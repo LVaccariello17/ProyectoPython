@@ -37,7 +37,7 @@ class Login:
 
         # Contraseña
         Label(frame, text = 'Contraseña: ').grid(row = 2, column = 0, pady = 5)
-        self.password = Entry(frame, show ='*', textvariable = passwordverify)
+        self.password = Entry(frame, textvariable = passwordverify, show = '*')
         self.password.focus()
         self.password.grid(row = 2, column = 1)
 
@@ -56,7 +56,7 @@ class Login:
     # Creación cuenta
     def crear_cuenta (self): 
         self.crearcuenta = Toplevel()
-        self.crearcuenta.title = 'Registro'
+        self.crearcuenta.title = 'Editar producto'
         self.crearcuenta.geometry("400x400")
         
         header = Label(self.crearcuenta, text = "Pantalla de registro")
@@ -101,7 +101,7 @@ class Login:
    
     def insertar_usuarios(self):
         if self.validacion():
-            query = """INSERT INTO usuarios (iduser, nombreuser, mail, contrasena) VALUES (NULL,%s,%s,%s)"""
+            query = """INSERT INTO usuarios (iduser, nombreuser, mail, contraseña) VALUES (NULL,%s,%s,%s)"""
             parametros =  (self.user.get(), self.mail.get(), self.password.get())
             self.consultar(query, parametros)
             messagebox.showinfo(message="Registro exitoso")           
@@ -128,7 +128,6 @@ class Login:
         
         cursor = cnx.cursor(buffered=True)
         
-       
         query = "SELECT contrasena, iduser FROM usuarios WHERE nombreuser = %s and contrasena = %s "
         parametros = (userverify.get(), passwordverify.get())
         cursor.execute(query, parametros)
@@ -154,9 +153,7 @@ class Product:
     def __init__(self):
         # Arranca 
         self.wind = Tk()
-        self.wind.title('Control de productos:')
-        
-        
+        self.wind.title('Control de productos')
 
         # Contenedor
         frame = LabelFrame(self.wind, text = 'Añadir producto')
@@ -212,15 +209,14 @@ class Product:
         return query
 
     # Obtener productos de la base de datos
-    def obtener_productos(self, iduser):
+    def obtener_productos(self):
         # limpiar tabla
         records = self.tree.get_children()
         cursor = cnx.cursor(buffered=True)
         for element in records:
             self.tree.delete(element)
         # obtener data
-        query = "SELECT id.productos,nombre.productos,precio.productos,stock.productos FROM productos LEFT JOIN usuarios on usuarios.iduser = productos.iduser WHERE usuarios.iduser = %s ORDER BY id DESC"
-        parametros = (self.iduser())
+        query = "SELECT id,nombre,precio,stock FROM productos ORDER BY id DESC"
         cursor.execute(query)
         db_rows = cursor.fetchall()
         # llenando data
@@ -232,11 +228,10 @@ class Product:
     def validacion(self):
         return len(self.name.get()) != 0 and len(self.price.get()) != 0
 
-    def anadir_producto(self, iduser):
+    def anadir_producto(self):
         if self.validacion():
-            self.iduser = iduser();
-            query = "INSERT INTO productos (id,nombre,precio,stock, iduser) VALUES (NULL,%s,%s,%s, %s)"
-            parametros =  (self.name.get(), self.price.get(), self.stock.get(), self.iduser())
+            query = "INSERT INTO productos (id,nombre,precio,stock) VALUES (NULL,%s,%s,%s)"
+            parametros =  (self.name.get(), self.price.get(), self.stock.get())
             self.consultar(query, parametros)
             self.message['text'] = 'Producto {} añadido'.format(self.name.get())
             self.name.delete(0, END)
